@@ -4,8 +4,13 @@ export default {
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
   ],
-  theme: {
-    extend: {},
-  },
+  // tailwind.config.js
+theme: {
+  extend: {
+    colors: { primary: "#059669", accent: "#D97706" },
+    fontFamily: { sans: ["Inter", "sans-serif"] },
+  }
+}
+,
   plugins: [],
 }
