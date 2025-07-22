@@ -85,5 +85,41 @@ def optimize():
         print("ERROR:", e)
         return jsonify({"error": str(e)}), 500
 
+@app.route("/get_price", methods=["POST"])
+def get_price():
+    try:
+        data = request.json
+        crop = data.get("crop")
+        region = data.get("region")
+
+        if not crop or not region:
+            return jsonify({"error": "Invalid crop or region"}), 400
+
+        df = pd.read_csv("Agriculture_price_dataset.csv")
+        df.columns = df.columns.str.strip().str.lower()
+
+        crop_col = next((col for col in df.columns if 'commodity' in col), None)
+        region_col = next((col for col in df.columns if 'state' in col), None)
+        price_col = next((col for col in df.columns if 'modal' in col), None)
+
+        if not crop_col or not region_col or not price_col:
+            return jsonify({"error": "Required columns not found in dataset."}), 500
+
+        filtered = df[
+            (df['State'].str.strip().str.lower() == region.strip().lower()) &
+            (df['Crop'].str.strip().str.lower() == crop.strip().lower())
+        ]
+
+
+        if filtered.empty:
+            return jsonify({"price": "N/A"})
+
+        avg_price = filtered[price_col].mean()
+        return jsonify({"price": round(avg_price, 2)})
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
 if __name__ == '__main__':
     app.run(port=5000)
